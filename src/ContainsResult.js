@@ -8,7 +8,18 @@ import Typography from "@mui/material/Typography";
 
 export const ContainsResult = (props) => {
   const { open, handleClose, answer } = props;
-  console.log(answer);
+
+  let image;
+  let text;
+
+  if (answer === "correct") {
+    image = "/image/正解.png";
+    text = "次の場所を目指しましょう";
+  } else if (answer === "incorrect") {
+    image = "/image/不正解.png";
+    text = "もう少し考えましょう";
+  }
+
   return (
     <Dialog
       open={open}
@@ -17,15 +28,10 @@ export const ContainsResult = (props) => {
       aria-describedby="alert-dialog-description"
     >
       <Card sx={{ maxWidth: 345 }}>
-        <CardMedia
-          component="img"
-          height="140"
-          image="/image/正解.png"
-          alt="正解"
-        />
+        <CardMedia component="img" height="230" image={image} alt="結果" />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            正解!
+            {text}
           </Typography>
         </CardContent>
         <CardActions>
