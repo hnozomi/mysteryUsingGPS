@@ -80,7 +80,6 @@ export const useCurrentPosition = () => {
       }
       console.log(count);
       console.log(count < 5);
-      alert(accuracy + "test実行" + count);
       await watchCurrentPosition();
     } while (50 < accuracy);
 
