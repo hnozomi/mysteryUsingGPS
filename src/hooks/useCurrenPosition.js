@@ -15,25 +15,25 @@ export const useCurrentPosition = () => {
       // timeout: 10000
     };
 
-    // const destination1 = [
-    //   {
-    //     //家の周辺
-    //     lat: 34.708389637880515,
-    //     lng: 135.52999062069316
-    //   },
-    //   {
-    //     lat: 34.70832632798597,
-    //     lng: 135.53120618702619
-    //   },
-    //   {
-    //     lat: 34.708247925096686,
-    //     lng: 135.53259437140576
-    //   },
-    //   {
-    //     lat: 34.70758517026514,
-    //     lng: 135.53197981135864
-    //   }
-    // ];
+    const destination1 = [
+      {
+        //家の周辺
+        lat: 34.708389637880515,
+        lng: 135.52999062069316
+      },
+      {
+        lat: 34.70832632798597,
+        lng: 135.53120618702619
+      },
+      {
+        lat: 34.70762505226196,
+        lng: 135.531211658692
+      },
+      {
+        lat: 34.707681748196656,
+        lng: 135.5301115637273
+      }
+    ];
 
     // let position = await new Promise((resolve, reject) => {
     //   navigator.geolocation.getCurrentPosition(resolve, reject, options);
@@ -47,7 +47,7 @@ export const useCurrentPosition = () => {
     let longitude = "";
     let message = "";
 
-    const test = async () => {
+    const watchCurrentPosition = async () => {
       count = parseInt(count) + 1;
       let position1 = await new Promise((resolve, reject) => {
         navigator.geolocation.watchPosition(resolve, reject, options);
@@ -59,36 +59,37 @@ export const useCurrentPosition = () => {
       // setLatitude(position1.coords.latitude);
       // setLongitude(position1.coords.longitudev);
       accuracy = position1.coords.accuracy;
-      alert(accuracy);
       latitude = position1.coords.latitude;
       longitude = position1.coords.longitude;
     };
 
+    //accuracy 100でも意外に離れている。目的地の四角の隅っこの場合とか外れるかも
+    // 50に変更してみる
+
     do {
-      alert(accuracy);
-      if (accuracy < 100) {
+      if (accuracy < 50) {
         break;
       }
-      console.log(100 < accuracy);
-      console.log(count);
+      console.log(accuracy);
+      console.log(50 < accuracy);
 
       if (5 < count) {
         message = "正確な位置情報の取得に失敗しました";
+        alert(message);
         break;
       }
+      console.log(count);
       console.log(count < 5);
       alert(accuracy + "test実行" + count);
-      await test();
-    } while (100 < accuracy);
+      await watchCurrentPosition();
+    } while (50 < accuracy);
 
-    // while ((accuracy > 100) | (count < 5)) {
-    //   alert("test実行");
-    //   await test();
-    // }
-
-    console.log(accuracy, "accuracy,");
-    console.log(latitude, "latitude,");
-    console.log(longitude, "longitude,");
+    alert(accuracy + "accuracy,");
+    alert(latitude + "latitude,");
+    alert(longitude + "longitude,");
+    // console.log(accuracy, "accuracy,");
+    // console.log(latitude, "latitude,");
+    // console.log(longitude, "longitude,");
 
     // console.log(position1);
     // console.log(position1.coords.accuracy, "position1.coords.accuracy,");
