@@ -34,9 +34,6 @@ export const ContainsResult = (props) => {
             {text}
           </Typography>
         </CardContent>
-        <CardActions>
-          <Button size="small">Learn More</Button>
-        </CardActions>
       </Card>
     </Dialog>
   );

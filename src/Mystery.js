@@ -5,15 +5,22 @@ import CardContent from "@mui/material/CardContent";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 import { Question } from "./const/Question";
 import { CompleteDialog } from "./CompleteDialog";
 import { ContainsResult } from "./ContainsResult";
 import { useCurrentPosition } from "./hooks/useCurrenPosition";
 
+// 謎解きの画面が表示されている
+// 表示のコンポーネント
+
 export const Mystery = () => {
   const [number, setNumber] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState({ isOpen: false, answer: null });
   const { checkCurrentPosition } = useCurrentPosition();
 
@@ -27,10 +34,12 @@ export const Mystery = () => {
   };
 
   const countUpMysteryNumber = async () => {
+    setLoading(true);
     const coordinate = Question[number].coordinate;
     const result = await checkCurrentPosition(coordinate);
 
     if (result) {
+      setLoading(false);
       if (number > 1) {
         setCompleted(true);
       } else {
@@ -39,6 +48,7 @@ export const Mystery = () => {
         localStorage.setItem("MysteryNumber", parseInt(number) + 1);
       }
     } else {
+      setLoading(false);
       setOpen({ ...open, isOpen: true, answer: "incorrect" });
     }
   };
@@ -58,6 +68,24 @@ export const Mystery = () => {
 
   if (completed) {
     return <CompleteDialog open={completed} handleClose={handleClose} />;
+  }
+
+  if (loading) {
+    return (
+      <Backdrop sx={{ color: "#fff" }} open={open} onClick={handleClose}>
+        <Box
+          sx={{
+            display: "flex",
+            flexFlow: "column",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography sx={{ mt: 1 }}>位置情報取得中</Typography>
+        </Box>
+      </Backdrop>
+    );
   }
 
   return open.isOpen ? (
