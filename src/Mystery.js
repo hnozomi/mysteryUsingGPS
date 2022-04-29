@@ -11,7 +11,7 @@ import Box from "@mui/material/Box";
 
 import { Question } from "./const/Question";
 import { CompleteDialog } from "./CompleteDialog";
-import { ContainsResult } from "./ContainsResult";
+import { IsContainsDialog } from "./IsContainsDialog";
 import { useCurrentPosition } from "./hooks/useCurrenPosition";
 
 // 謎解きの画面が表示されている
@@ -66,13 +66,17 @@ export const Mystery = () => {
     setOpen(false);
   };
 
+  const deleteLocalStorage = () => {
+    localStorage.removeItem("MysteryNumber");
+  };
+
   if (completed) {
     return <CompleteDialog open={completed} handleClose={handleClose} />;
   }
 
   if (loading) {
     return (
-      <Backdrop sx={{ color: "#fff" }} open={open} onClick={handleClose}>
+      <Backdrop sx={{ color: "#fff" }} open={true} onClick={handleClose}>
         <Box
           sx={{
             display: "flex",
@@ -89,7 +93,7 @@ export const Mystery = () => {
   }
 
   return open.isOpen ? (
-    <ContainsResult
+    <IsContainsDialog
       open={open.isOpen}
       handleClose={handleClose1}
       answer={open.answer}
@@ -102,15 +106,24 @@ export const Mystery = () => {
         </Typography>
         <Typography sx={{ mb: 2 }}>以下の場所へ向かえ</Typography>
         <Paper sx={{ p: 2 }}>
-          <Typography variant="body2" color="text.secondary">
+          {/* <Typography variant="body2" color="text.secondary">
             {`謎解き${Question[number].mystery}`}
-          </Typography>
+          </Typography> */}
+          <img
+            src={`/image/${number}.png`}
+            alt="謎解き"
+            width="100%"
+            height="200"
+          />
         </Paper>
         <Typography sx={{ mt: 2 }}>
           目的地に到着したらボタンを押してください
         </Typography>
       </CardContent>
       <CardActions sx={{ position: "flex", justifyContent: "flex-end" }}>
+        <Button onClick={deleteLocalStorage} variant="outlined" size="small">
+          リセットする
+        </Button>
         <Button onClick={countUpMysteryNumber} variant="outlined" size="small">
           到着
         </Button>

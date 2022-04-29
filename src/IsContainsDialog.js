@@ -1,12 +1,10 @@
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 
-export const ContainsResult = (props) => {
+export const IsContainsDialog = (props) => {
   const { open, handleClose, answer } = props;
 
   let image;
