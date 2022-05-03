@@ -35,6 +35,7 @@ export const useCurrentPosition = () => {
     const startTime = performance.now();
     console.log(startTime, "開始時刻");
     while (50 < accuracy && count < 5) {
+      console.log("watch実行します");
       await watchCurrentPosition();
     }
 
@@ -74,28 +75,6 @@ export const useCurrentPosition = () => {
 
   let watchId = 0;
 
-  const success = (position) => {
-    console.log("success実行");
-    count = count + 1;
-    console.log(count);
-    accuracy = position.coords.accuracy;
-    latitude = position.coords.latitude;
-    longitude = position.coords.longitude;
-
-    console.log(accuracy, latitude, longitude);
-    alert(accuracy);
-
-    if (accuracy < 50 || 5 < count) {
-      console.log("clearが実行されました");
-      navigator.geolocation.clearWatch(watchId);
-      return false;
-    }
-  };
-
-  const error = (err) => {
-    console.log(err);
-  };
-
   const test = async (destination) => {
     console.log("test実行", watchId);
     navigator.geolocation.clearWatch(watchId);
@@ -114,34 +93,35 @@ export const useCurrentPosition = () => {
     return isContains;
   };
 
-  const checkCurrentPosition = async (destination) => {
-    // const timerID = setTimeout(function () {
-    //   test(destination);
-    // }, 40000);
+  const getAccuracy = (position) => {
+    accuracy = position.coords.accuracy;
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
 
+    console.log(accuracy, latitude, longitude);
+  };
+
+  const checkCurrentPosition = async (destination) => {
     const position = await new Promise((resolve, reject) => {
-      const watchId = navigator.geolocation.watchPosition(
-        resolve,
-        error,
-        options
-      );
+      watchId = navigator.geolocation.watchPosition(resolve, reject, options);
       console.log(watchId, "AAA");
     });
 
     console.log("position実行");
     count = count + 1;
     console.log(count);
-    accuracy = position.coords.accuracy;
-    latitude = position.coords.latitude;
-    longitude = position.coords.longitude;
-
-    console.log(accuracy, latitude, longitude);
     alert(accuracy);
+
+    // setInterval(() => getAccuracy(position), 1000);
 
     if (accuracy < 50 || 5 < count) {
       console.log("clearが実行されました");
       navigator.geolocation.clearWatch(watchId);
     }
+
+    console.log(watchId);
+
+    return false;
   };
 
   return { checkCurrentPosition };
