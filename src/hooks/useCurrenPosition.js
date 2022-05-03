@@ -1,59 +1,47 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const useCurrentPosition = () => {
+  const [check, setCheck] = useState(false);
   let count = 0;
   let accuracy = 1000;
   let latitude = "";
   let longitude = "";
-  let message = "";
 
   const options = {
     enableHighAccuracy: true,
     maximumAge: 0
-    // timeout: 10000　//タイムアウト値を設けると指定秒数以内に反応がなくエラーになってしまう
+    // timeout: 100 //タイムアウト値を設けると指定秒数以内に反応がなくエラーになってしまう
   };
 
   const watchCurrentPosition = async () => {
-    count = parseInt(count) + 1;
-
     let position = await new Promise((resolve, reject) => {
+      // navigator.geolocation.getCurrentPosition(resolve, reject, options);
       navigator.geolocation.watchPosition(resolve, reject, options);
     });
 
-    let positions = new Promise((resolve, reject) => {
-      navigator.geolocation.watchPosition(resolve, reject, options);
-    });
-
-    positions.then((position) => {
-      console.log(position);
-    });
-
-    // console.log(position);
     accuracy = position.coords.accuracy;
     latitude = position.coords.latitude;
     longitude = position.coords.longitude;
+
+    alert(accuracy, "accuracy");
+    // console.log(accuracy, "accuracy");
+
+    count = count + 1;
   };
 
-  const checkCurrentPosition = async (destination) => {
-    // do {
-    //   if (accuracy < 50) {
-    //     break;
-    //   }
-
-    //   if (5 < count) {
-    //     message = "正確な位置情報の取得に失敗しました";
-    //     alert(message);
-    //     break;
-    //   }
-    //   await watchCurrentPosition();
-    // } while (50 < accuracy);
-
+  const checkCurrentPosition1 = async (destination) => {
     // 論理和(||)は一つ以上trueがある場合にtrueを返す。
     // 論理積(&&)はすべてのオペランドがtrueの場合にtrueを返す
-    let id;
+    const startTime = performance.now();
+    console.log(startTime, "開始時刻");
     while (50 < accuracy && count < 5) {
-      id = await watchCurrentPosition();
+      await watchCurrentPosition();
     }
+
+    const endTime = performance.now();
+    console.log(endTime, "終了時刻");
+
+    alert((endTime - startTime) / 1000);
 
     // watchPositionすると何回結果を返したかidに入る
     //navigator.geolocation.clearWatch(id);
@@ -82,6 +70,78 @@ export const useCurrentPosition = () => {
     );
 
     return isContains;
+  };
+
+  let watchId = 0;
+
+  const success = (position) => {
+    console.log("success実行");
+    count = count + 1;
+    console.log(count);
+    accuracy = position.coords.accuracy;
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+
+    console.log(accuracy, latitude, longitude);
+    alert(accuracy);
+
+    if (accuracy < 50 || 5 < count) {
+      console.log("clearが実行されました");
+      navigator.geolocation.clearWatch(watchId);
+      return false;
+    }
+  };
+
+  const error = (err) => {
+    console.log(err);
+  };
+
+  const test = async (destination) => {
+    console.log("test実行", watchId);
+    navigator.geolocation.clearWatch(watchId);
+
+    const currentPosition = new google.maps.LatLng(latitude, longitude);
+
+    const squareDestination = new google.maps.Polygon({
+      paths: destination
+    });
+
+    const isContains = google.maps.geometry.poly.containsLocation(
+      currentPosition,
+      squareDestination
+    );
+
+    return isContains;
+  };
+
+  const checkCurrentPosition = async (destination) => {
+    // const timerID = setTimeout(function () {
+    //   test(destination);
+    // }, 40000);
+
+    const position = await new Promise((resolve, reject) => {
+      const watchId = navigator.geolocation.watchPosition(
+        resolve,
+        error,
+        options
+      );
+      console.log(watchId, "AAA");
+    });
+
+    console.log("position実行");
+    count = count + 1;
+    console.log(count);
+    accuracy = position.coords.accuracy;
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+
+    console.log(accuracy, latitude, longitude);
+    alert(accuracy);
+
+    if (accuracy < 50 || 5 < count) {
+      console.log("clearが実行されました");
+      navigator.geolocation.clearWatch(watchId);
+    }
   };
 
   return { checkCurrentPosition };

@@ -24,6 +24,7 @@ export const Mystery = () => {
   const [open, setOpen] = useState({ isOpen: false, answer: null });
   const { checkCurrentPosition } = useCurrentPosition();
 
+  // 謎解きの問題番号を取得する
   const getMysteryNumber = () => {
     const mysteryNumber = localStorage.getItem("MysteryNumber");
     if (mysteryNumber === null) {
@@ -33,10 +34,13 @@ export const Mystery = () => {
     }
   };
 
+  // 正解かチェックする
+  // 正解なら謎解き番号をカウントアップする
   const countUpMysteryNumber = async () => {
     setLoading(true);
     const coordinate = Question[number].coordinate;
     const result = await checkCurrentPosition(coordinate);
+    console.log(result, "result");
 
     if (result) {
       setLoading(false);
@@ -48,24 +52,30 @@ export const Mystery = () => {
         localStorage.setItem("MysteryNumber", parseInt(number) + 1);
       }
     } else {
+      console.log("実行されました");
       setLoading(false);
       setOpen({ ...open, isOpen: true, answer: "incorrect" });
     }
   };
 
+  // 画面表示時点で謎解き番号を取得する
+  // 関数に分ける必要ある?
   useEffect(() => {
     getMysteryNumber();
   }, []);
 
+  // 完了画面を閉じる
   const handleClose = () => {
     setCompleted(false);
     localStorage.removeItem("MysteryNumber");
   };
 
+  // 正解か不正解ダイアログを閉じる
   const handleClose1 = () => {
     setOpen(false);
   };
 
+  // ローカルストレージから謎解き番号を削除する
   const deleteLocalStorage = () => {
     localStorage.removeItem("MysteryNumber");
   };
