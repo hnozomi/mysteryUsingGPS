@@ -20,9 +20,9 @@ import { useCurrentPosition } from "./hooks/useCurrenPosition";
 export const Mystery = () => {
   const [number, setNumber] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState({ isOpen: false, answer: null });
-  const { checkCurrentPosition } = useCurrentPosition();
+  const { checkCurrentPosition, loading, res } = useCurrentPosition();
 
   // 謎解きの問題番号を取得する
   const getMysteryNumber = () => {
@@ -34,16 +34,18 @@ export const Mystery = () => {
     }
   };
 
+  console.log(res, "関数ガイ");
   // 正解かチェックする
   // 正解なら謎解き番号をカウントアップする
   const countUpMysteryNumber = async () => {
-    setLoading(true);
+    // setLoading(true);
     const coordinate = Question[number].coordinate;
     const result = await checkCurrentPosition(coordinate);
     console.log(result, "result");
+    console.log(res, "res巻子内");
 
     if (result) {
-      setLoading(false);
+      // setLoading(false);
       if (number > 1) {
         setCompleted(true);
       } else {
@@ -53,8 +55,8 @@ export const Mystery = () => {
       }
     } else {
       console.log("実行されました");
-      setLoading(false);
-      setOpen({ ...open, isOpen: true, answer: "incorrect" });
+      // setLoading(false);
+      // setOpen({ ...open, isOpen: true, answer: "incorrect" });
     }
   };
 

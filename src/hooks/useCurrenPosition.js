@@ -1,11 +1,17 @@
+import { LoadScriptNext } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 
 export const useCurrentPosition = () => {
   const [check, setCheck] = useState(false);
+  const [judge, setJudge] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [res, setResult] = useState(null);
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
   let count = 0;
   let accuracy = 1000;
-  let latitude = "";
-  let longitude = "";
+  let lati = "";
+  let long = "";
 
   const options = {
     enableHighAccuracy: true,
@@ -19,9 +25,9 @@ export const useCurrentPosition = () => {
       navigator.geolocation.watchPosition(resolve, reject, options);
     });
 
-    accuracy = position.coords.accuracy;
-    latitude = position.coords.latitude;
-    longitude = position.coords.longitude;
+    // accuracy = position.coords.accuracy;
+    // latitude = position.coords.latitude;
+    // longitude = position.coords.longitude;
 
     alert(accuracy, "accuracy");
     // console.log(accuracy, "accuracy");
@@ -75,11 +81,11 @@ export const useCurrentPosition = () => {
 
   let watchId = 0;
 
-  const test = async (destination) => {
-    console.log("test実行", watchId);
-    navigator.geolocation.clearWatch(watchId);
-
-    const currentPosition = new google.maps.LatLng(latitude, longitude);
+  const test = async (destination, lati, long) => {
+    console.log("test実行");
+    console.log(lati, long);
+    console.log(destination);
+    const currentPosition = new google.maps.LatLng(lati, long);
 
     const squareDestination = new google.maps.Polygon({
       paths: destination
@@ -90,39 +96,114 @@ export const useCurrentPosition = () => {
       squareDestination
     );
 
+    console.log(isContains, "isC");
+    setResult(isContains);
+
     return isContains;
   };
 
-  const getAccuracy = (position) => {
-    accuracy = position.coords.accuracy;
-    latitude = position.coords.latitude;
-    longitude = position.coords.longitude;
-
-    console.log(accuracy, latitude, longitude);
-  };
-
-  const checkCurrentPosition = async (destination) => {
-    const position = await new Promise((resolve, reject) => {
-      watchId = navigator.geolocation.watchPosition(resolve, reject, options);
-      console.log(watchId, "AAA");
-    });
-
-    console.log("position実行");
+  const success = (position) => {
     count = count + 1;
-    console.log(count);
+    accuracy = position.coords.accuracy;
+    lati = position.coords.latitude;
+    long = position.coords.longitude;
+    setLatitude(position.coords.latitude);
+    setLongitude(position.coords.longitude);
+    console.log(accuracy, lati, long);
     alert(accuracy);
-
-    // setInterval(() => getAccuracy(position), 1000);
 
     if (accuracy < 50 || 5 < count) {
       console.log("clearが実行されました");
+      alert(accuracy);
       navigator.geolocation.clearWatch(watchId);
+      setJudge(false);
+      const aaa = func(lati, long);
+      aaa.then((bbb) => {
+        console.log(bbb, "funcの結果bbb");
+      });
+
+      setLoading(false);
     }
-
-    console.log(watchId);
-
-    return false;
   };
 
-  return { checkCurrentPosition };
+  const error = (err) => {
+    console.log(err);
+  };
+
+  const watchTest = async () => {
+    new Promise((resolve, reject) => {
+      navigator.geolocation.watchPosition(success, error, options);
+    });
+  };
+
+  const sleep = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  const checkCurrentPosition = async (destination) => {
+    console.log("checkCurrentPositionが実行されました");
+    setLoading(true);
+    // const position = await new Promise((resolve, reject) => {
+    //   watchId = navigator.geolocation.watchPosition(resolve, reject, options);
+    // });
+
+    watchId = navigator.geolocation.watchPosition(success, error, options);
+    // sleep(5000);
+    console.log(destination, latitude, longitude, "ccc");
+    console.log(judge);
+    // do {
+    //   console.log("doします");
+    //   sleep(5000);
+    //   console.log("doしました");
+    // } while (judge);
+
+    const ccc = test(destination, latitude, longitude);
+    ccc.then((ddd) => console.log(ddd));
+
+    // count = count + 1;
+    // alert(accuracy);
+
+    // if (accuracy < 50 || 5 < count) {
+    //   console.log("clearが実行されました");
+    //   navigator.geolocation.clearWatch(watchId);
+    //   setLoading(false);
+    // }
+    console.log("checkCurrentPositionが終了しました");
+  };
+
+  const destination = [
+    {
+      //家の周辺
+      lat: 34.708389637880515,
+      lng: 135.52999062069316
+    },
+    {
+      lat: 34.70832632798597,
+      lng: 135.53120618702619
+    },
+    {
+      lat: 34.70762505226196,
+      lng: 135.531211658692
+    },
+    {
+      lat: 34.707681748196656,
+      lng: 135.5301115637273
+    }
+  ];
+
+  const func = async (lati, long) => {
+    console.log("funcが起動");
+    const res = await test(destination, lati, long);
+    console.log(res, "idCOntains結果");
+    // alert(res);
+    alert(res);
+    return res;
+  };
+
+  // useEffect(() => {
+  //   func();
+  // }, [judge]);
+
+  console.log(loading, watchId, judge);
+  return { checkCurrentPosition, loading, res };
 };
