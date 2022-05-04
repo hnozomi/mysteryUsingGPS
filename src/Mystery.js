@@ -56,7 +56,7 @@ export const Mystery = () => {
     } else {
       console.log("実行されました");
       // setLoading(false);
-      // setOpen({ ...open, isOpen: true, answer: "incorrect" });
+      setOpen({ ...open, isOpen: true, answer: "incorrect" });
     }
   };
 
