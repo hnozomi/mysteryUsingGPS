@@ -10,6 +10,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 
 import { Question } from "./const/Question";
+import { ErrorMessage } from "./const/ErrorMessage";
 import { CompleteDialog } from "./CompleteDialog";
 import { IsContainsDialog } from "./IsContainsDialog";
 import { useCurrentPosition } from "./hooks/useCurrenPosition";
@@ -19,10 +20,16 @@ import { useCurrentPosition } from "./hooks/useCurrenPosition";
 
 export const Mystery = () => {
   const [number, setNumber] = useState(0);
+  const [error, setError] = useState({ status: false, message: "" });
   const [completed, setCompleted] = useState(false);
-  // const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState({ isOpen: false, answer: null });
-  const { checkCurrentPosition, loading, res } = useCurrentPosition();
+  const { checkCurrentPosition, loading } = useCurrentPosition();
+
+  // 画面表示時点で謎解き番号を取得する
+  // 関数に分ける必要ある?
+  useEffect(() => {
+    getMysteryNumber();
+  }, []);
 
   // 謎解きの問題番号を取得する
   const getMysteryNumber = () => {
@@ -34,18 +41,20 @@ export const Mystery = () => {
     }
   };
 
-  console.log(res, "関数ガイ");
   // 正解かチェックする
   // 正解なら謎解き番号をカウントアップする
   const countUpMysteryNumber = async () => {
-    // setLoading(true);
     const coordinate = Question[number].coordinate;
-    const result = await checkCurrentPosition(coordinate);
-    console.log(result, "result");
-    console.log(res, "res巻子内");
+
+    const result = await checkCurrentPosition(coordinate).catch((err) => {
+      const message = ErrorMessage.find(
+        (error) => error.errorCode === err.code
+      );
+
+      setError({ ...error, status: true, message: message.errorMessage });
+    });
 
     if (result) {
-      // setLoading(false);
       if (number > 1) {
         setCompleted(true);
       } else {
@@ -54,26 +63,18 @@ export const Mystery = () => {
         localStorage.setItem("MysteryNumber", parseInt(number) + 1);
       }
     } else {
-      console.log("実行されました");
-      // setLoading(false);
       setOpen({ ...open, isOpen: true, answer: "incorrect" });
     }
   };
 
-  // 画面表示時点で謎解き番号を取得する
-  // 関数に分ける必要ある?
-  useEffect(() => {
-    getMysteryNumber();
-  }, []);
-
   // 完了画面を閉じる
-  const handleClose = () => {
+  const handleCloseCompleteDialog = () => {
     setCompleted(false);
     localStorage.removeItem("MysteryNumber");
   };
 
   // 正解か不正解ダイアログを閉じる
-  const handleClose1 = () => {
+  const handleCloseResultDialog = () => {
     setOpen(false);
   };
 
@@ -82,13 +83,22 @@ export const Mystery = () => {
     localStorage.removeItem("MysteryNumber");
   };
 
+  if (error.status) {
+    return <div>{error.message}</div>;
+  }
+
   if (completed) {
-    return <CompleteDialog open={completed} handleClose={handleClose} />;
+    return (
+      <CompleteDialog
+        open={completed}
+        handleClose={handleCloseCompleteDialog}
+      />
+    );
   }
 
   if (loading) {
     return (
-      <Backdrop sx={{ color: "#fff" }} open={true} onClick={handleClose}>
+      <Backdrop sx={{ color: "#fff" }} open={true}>
         <Box
           sx={{
             display: "flex",
@@ -107,7 +117,7 @@ export const Mystery = () => {
   return open.isOpen ? (
     <IsContainsDialog
       open={open.isOpen}
-      handleClose={handleClose1}
+      handleClose={handleCloseResultDialog}
       answer={open.answer}
     />
   ) : (
@@ -118,9 +128,6 @@ export const Mystery = () => {
         </Typography>
         <Typography sx={{ mb: 2 }}>以下の場所へ向かえ</Typography>
         <Paper sx={{ p: 2 }}>
-          {/* <Typography variant="body2" color="text.secondary">
-            {`謎解き${Question[number].mystery}`}
-          </Typography> */}
           <img
             src={`/image/${number}.png`}
             alt="謎解き"
